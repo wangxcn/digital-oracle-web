@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Oracle - 市场预测分析</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links { display: flex; gap: 20px; }
+        
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: #58a6ff; }
+        
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #8b949e;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        
+        .api-config {
+            max-width: 600px;
+            margin: 0 auto 20px;
+            padding: 12px 16px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .api-config label {
+            color: #8b949e;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .api-config input {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            outline: none;
+        }
+        
+        .api-config input:focus { border-color: #58a6ff; }
+        
+        .search-box {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 16px 100px 16px 20px;
+            font-size: 16px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box input:focus { border-color: #58a6ff; }
+        .search-box input::placeholder { color: #6e7681; }
+        
+        .search-box button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            background: #238636;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .search-box button:hover { background: #2ea043; }
+        .search-box button:disabled { background: #6e7681; cursor: not-allowed; }
+        
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        
+        .example-btn {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            color: #8b949e;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            background: rgba(88,166,255,0.1);
+            color: #58a6ff;
+            border-color: #58a6ff;
+        }
+        
+        .result {
+            margin-top: 40px;
+            padding: 24px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.active { display: block; }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .result-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .result-content h2 { color: #58a6ff; margin: 1em 0 0.5em; font-size: 20px; }
+        .result-content h3 { color: #a371f7; margin: 1em 0 0.5em; font-size: 16px; }
+        .result-content h2:first-child, .result-content h3:first-child { margin-top: 0; }
+        .result-content strong { color: #ff7b72; }
+        .result-content code { background: rgba(110,118,129,0.3); padding: 2px 6px; border-radius: 4px; }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 40px;
+            color: #8b949e;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .error {
+            background: rgba(248,81,73,0.1);
+            border: 1px solid rgba(248,81,73,0.3);
+            color: #f85149;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6e7681;
+            font-size: 13px;
+        }
+        
+        .data-sources {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .data-sources a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+        
+        .data-sources a:hover { color: #58a6ff; }
+        
+        .badge {
+            width: 16px;
+            height: 16px;
+            background: #238636;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">📈 Digital Oracle</div>
+        <div class="nav-links">
+            <a href="https://github.com/komako-workshop/digital-oracle" target="_blank">GitHub</a>
+            <a id="healthLink" href="#" target="_blank">API Status</a>
+        </div>
+    </header>
+    
+    <main>
+        <h1>Digital Oracle</h1>
+        <p class="subtitle">All you need is already priced in.</p>
+        
+        <div class="api-config">
+            <label>API 地址:</label>
+            <input type="text" id="apiUrl" value="http://192.168.1.44:8888" placeholder="http://your-api-server:port">
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="question" placeholder="你想知道什么？" onkeydown="if(event.key==='Enter')analyze()">
+            <button id="submitBtn" onclick="analyze()">分析 →</button>
+        </div>
+        
+        <div class="examples">
+            <button class="example-btn" onclick="setQuestion('WW3发生的概率是多少？')">WW3概率</button>
+            <button class="example-btn" onclick="setQuestion('美国经济未来12个月会衰退吗？')">经济衰退</button>
+            <button class="example-btn" onclick="setQuestion('现在是买入黄金的好时机吗？')">黄金走势</button>
+            <button class="example-btn" onclick="setQuestion('SPY本月会下跌5%吗？')">SPY预测</button>
+            <button class="example-btn" onclick="setQuestion('AI是否存在泡沫？')">AI泡沫</button>
+            <button class="example-btn" onclick="setQuestion('俄乌战争何时结束？')">战争结束</button>
+            <button class="example-btn" onclick="setQuestion('比特币未来走势如何？')">比特币</button>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-header">
+                <span>📊 分析结果</span>
+                <span id="timestamp" style="color:#6e7681;font-size:12px;"></span>
+            </div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Powered by Digital Oracle — 基于市场数据的预测分析</p>
+        <div class="data-sources">
+            <a href="https://polymarket.com" target="_blank"><span class="badge">PM</span> Polymarket</a>
+            <a href="https://kalshi.com" target="_blank"><span class="badge">K</span> Kalshi</a>
+            <a href="https://finance.yahoo.com" target="_blank"><span class="badge">Y</span> Yahoo Finance</a>
+            <a href="https://www.coingecko.com" target="_blank"><span class="badge">CG</span> CoinGecko</a>
+            <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank"><span class="badge">FG</span> Fear & Greed</a>
+            <a href="https://home.treasury.gov" target="_blank"><span class="badge">T</span> Treasury</a>
+        </div>
+    </footer>
+    
+    <script>
+        // 更新健康检查链接
+        function updateHealthLink() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            document.getElementById('healthLink').href = apiUrl + '/api/health';
+        }
+        document.getElementById('apiUrl').addEventListener('input', updateHealthLink);
+        updateHealthLink();
+        
+        function setQuestion(q) {
+            document.getElementById('question').value = q;
+            analyze();
+        }
+        
+        async function analyze() {
+            const question = document.getElementById('question').value.trim();
+            if (!question) { document.getElementById('question').focus(); return; }
+            
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const btn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            const content = document.getElementById('resultContent');
+            
+            btn.disabled = true;
+            btn.textContent = '分析中...';
+            result.classList.add('active');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><span>正在获取市场数据...</span></div>';
+            
+            try {
+                const res = await fetch(apiUrl + '/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.detail || 'API错误: ' + res.status);
+                }
+                
+                const data = await res.json();
+                content.innerHTML = formatMarkdown(data.analysis);
+                document.getElementById('timestamp').textContent = new Date().toLocaleString('zh-CN');
+                
+            } catch (e) {
+                content.innerHTML = `<div class="error"><strong>错误</strong><br>${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '分析 →';
+            }
+        }
+        
+        function formatMarkdown(text) {
+            return text
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.+?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>
